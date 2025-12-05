@@ -1,0 +1,1387 @@
+<!doctype html>
+<html lang="id">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ular Tangga Pahlawan</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100%;
+      width: 100%;
+    }
+
+    .game-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      width: 100%;
+    }
+
+    .game-header {
+      text-align: center;
+      color: white;
+      margin-bottom: 30px;
+    }
+
+    .game-title {
+      font-size: 42px;
+      font-weight: bold;
+      margin: 0 0 10px 0;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .player-setup {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .setup-title {
+      font-size: 28px;
+      color: #667eea;
+      margin-bottom: 25px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .player-count-selector {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .player-count-btn {
+      padding: 15px 30px;
+      font-size: 20px;
+      border: 3px solid #667eea;
+      background: white;
+      color: #667eea;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-weight: bold;
+    }
+
+    .player-count-btn:hover {
+      background: #f0f4ff;
+      transform: translateY(-2px);
+    }
+
+    .player-count-btn.active {
+      background: #667eea;
+      color: white;
+    }
+
+    .start-game-btn {
+      display: block;
+      width: 100%;
+      padding: 18px;
+      font-size: 24px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+
+    .start-game-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    .game-board-container {
+      display: none;
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .game-info {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .players-info {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      flex: 1;
+    }
+
+    .player-card {
+      background: #f8f9fa;
+      padding: 15px 20px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border: 3px solid transparent;
+      transition: all 0.3s;
+    }
+
+    .player-card.active {
+      border-color: #667eea;
+      background: #f0f4ff;
+      transform: scale(1.05);
+    }
+
+    .player-card.finished {
+      opacity: 0.6;
+      background: #e9ecef;
+    }
+
+    .player-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border: 2px solid #667eea;
+    }
+
+    .player-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .player-details {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .player-name {
+      font-weight: bold;
+      color: #333;
+      font-size: 16px;
+    }
+
+    .player-stats {
+      font-size: 13px;
+      color: #666;
+    }
+
+    .board-grid {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 2px;
+      margin-bottom: 25px;
+      background: #e9ecef;
+      padding: 2px;
+      border-radius: 12px;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .board-cell {
+      aspect-ratio: 1;
+      background: white;
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: bold;
+      color: #666;
+      position: relative;
+      padding: 3px;
+    }
+
+    .cell-number {
+      position: absolute;
+      top: 2px;
+      left: 3px;
+      font-size: 8px;
+      color: #999;
+    }
+
+    .board-cell.snake {
+      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+      color: white;
+    }
+
+    .board-cell.ladder {
+      background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%);
+      color: white;
+    }
+
+    .board-cell.finish {
+      background: linear-gradient(135deg, #ffd43b 0%, #fab005 100%);
+      color: #333;
+      font-size: 18px;
+    }
+
+    .cell-players {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2px;
+      margin-top: 5px;
+    }
+
+    .cell-player-avatar {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid white;
+      overflow: hidden;
+    }
+
+    .cell-player-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .dice-control {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .dice-display {
+      font-size: 72px;
+      margin-bottom: 15px;
+      height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .roll-dice-btn {
+      padding: 15px 40px;
+      font-size: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+
+    .roll-dice-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    .roll-dice-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .quiz-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .quiz-content {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 600px;
+      width: 100%;
+      max-height: 90%;
+      overflow-y: auto;
+    }
+
+    .quiz-question {
+      font-size: 22px;
+      color: #333;
+      margin-bottom: 25px;
+      font-weight: bold;
+      line-height: 1.5;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .quiz-option {
+      padding: 18px 24px;
+      background: #f8f9fa;
+      border: 2px solid #dee2e6;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 16px;
+      text-align: left;
+    }
+
+    .quiz-option:hover {
+      background: #e9ecef;
+      border-color: #667eea;
+      transform: translateX(5px);
+    }
+
+    .quiz-option.correct {
+      background: #d3f9d8;
+      border-color: #51cf66;
+    }
+
+    .quiz-option.wrong {
+      background: #ffe3e3;
+      border-color: #ff6b6b;
+    }
+
+    .quiz-option:disabled {
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    .quiz-result {
+      margin-top: 20px;
+      padding: 20px;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .quiz-result.correct {
+      background: #d3f9d8;
+      color: #2b8a3e;
+    }
+
+    .quiz-result.wrong {
+      background: #ffe3e3;
+      color: #c92a2a;
+    }
+
+    .penalty-choice {
+      display: flex;
+      gap: 15px;
+      margin-top: 20px;
+      justify-content: center;
+    }
+
+    .penalty-btn {
+      padding: 15px 30px;
+      font-size: 16px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+
+    .penalty-btn.move-back {
+      background: #ff8787;
+      color: white;
+    }
+
+    .penalty-btn.lose-points {
+      background: #ffa94d;
+      color: white;
+    }
+
+    .penalty-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    .continue-btn {
+      padding: 15px 40px;
+      font-size: 18px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+
+    .continue-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    .finish-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .finish-content {
+      background: white;
+      border-radius: 20px;
+      padding: 50px;
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .finish-title {
+      font-size: 36px;
+      color: #667eea;
+      margin-bottom: 30px;
+      font-weight: bold;
+    }
+
+    .finish-player-avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 25px;
+      border: 5px solid #667eea;
+      overflow: hidden;
+    }
+
+    .finish-player-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .finish-player-name {
+      font-size: 28px;
+      color: #333;
+      margin-bottom: 15px;
+      font-weight: bold;
+    }
+
+    .finish-score {
+      font-size: 24px;
+      color: #666;
+      margin-bottom: 30px;
+    }
+
+    .finish-ranking {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 25px;
+      text-align: left;
+    }
+
+    .ranking-title {
+      font-size: 20px;
+      color: #667eea;
+      margin-bottom: 15px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .ranking-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 12px;
+      margin-bottom: 10px;
+      background: white;
+      border-radius: 8px;
+    }
+
+    .ranking-position {
+      font-size: 24px;
+      font-weight: bold;
+      color: #667eea;
+      min-width: 40px;
+    }
+
+    .ranking-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border: 2px solid #667eea;
+    }
+
+    .ranking-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .ranking-info {
+      flex: 1;
+    }
+
+    .ranking-name {
+      font-weight: bold;
+      color: #333;
+      font-size: 16px;
+    }
+
+    .ranking-score {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .close-finish-btn {
+      padding: 15px 40px;
+      font-size: 18px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .close-finish-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    @media (max-width: 768px) {
+      .game-title {
+        font-size: 32px;
+      }
+
+      .player-setup {
+        padding: 25px;
+      }
+
+      .setup-title {
+        font-size: 24px;
+      }
+
+      .player-count-btn {
+        padding: 12px 20px;
+        font-size: 18px;
+      }
+
+      .board-grid {
+        gap: 2px;
+      }
+
+      .board-cell {
+        font-size: 10px;
+      }
+
+      .cell-number {
+        font-size: 9px;
+      }
+
+      .quiz-content {
+        padding: 25px;
+      }
+
+      .quiz-question {
+        font-size: 18px;
+      }
+
+      .finish-content {
+        padding: 30px;
+      }
+
+      .finish-title {
+        font-size: 28px;
+      }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <div class="game-container">
+   <div class="game-header">
+    <h1 class="game-title" id="gameTitle">Ular Tangga Pahlawan</h1>
+   </div>
+   <div class="player-setup" id="playerSetup">
+    <h2 class="setup-title">Pilih Jumlah Pemain</h2>
+    <div class="player-count-selector"><button class="player-count-btn" data-count="2">2 Pemain</button> <button class="player-count-btn active" data-count="3">3 Pemain</button> <button class="player-count-btn" data-count="4">4 Pemain</button>
+    </div><button class="start-game-btn" id="startGameBtn">Mulai Permainan</button>
+   </div>
+   <div class="game-board-container" id="gameBoardContainer">
+    <div class="game-info">
+     <div class="players-info" id="playersInfo"></div>
+    </div>
+    <div class="board-grid" id="boardGrid"></div>
+    <div class="dice-control">
+     <div class="dice-display" id="diceDisplay">
+      🎲
+     </div><button class="roll-dice-btn" id="rollDiceBtn">Lempar Dadu</button>
+    </div>
+   </div>
+  </div>
+  <div class="quiz-modal" id="quizModal">
+   <div class="quiz-content">
+    <div class="quiz-question" id="quizQuestion"></div>
+    <div class="quiz-options" id="quizOptions"></div>
+    <div class="quiz-result" id="quizResult"></div>
+    <div class="penalty-choice" id="penaltyChoice"></div><button class="continue-btn" id="continueBtn" style="display: none;">Lanjutkan</button>
+   </div>
+  </div>
+  <div class="finish-modal" id="finishModal">
+   <div class="finish-content">
+    <h2 class="finish-title">Selesai!</h2>
+    <div class="finish-player-avatar" id="finishPlayerAvatar"></div>
+    <div class="finish-player-name" id="finishPlayerName"></div>
+    <div class="finish-score" id="finishPlayerScore"></div>
+    <div class="finish-ranking" id="finishRanking"></div><button class="close-finish-btn" id="closeFinishBtn">Tutup</button>
+   </div>
+  </div>
+  <script>
+    const defaultConfig = {
+      game_title: "Ular Tangga Pahlawan",
+      quiz_correct_points: "20",
+      quiz_wrong_penalty: "10"
+    };
+
+    const avatars = [
+      'assets/1.jpg',
+      'assets/2.jpg',
+      'assets/3.jpg',
+      'assets/4.jpg',
+      'assets/5.jpg',
+      'assets/6.jpg',
+      'assets/7.jpg'
+    ];
+    const diceEmojis = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+
+    const snakesAndLadders = {
+      6: 17,
+      14: 3,
+      20: 38,
+      24: 16,
+      31: 9,
+      42: 59,
+      48: 26,
+      50: 67,
+      62: 18,
+      64: 83,
+      71: 52,
+      74: 88,
+      87: 68,
+      93: 53,
+      95: 75,
+      99: 41
+    };
+
+    const quizData = [
+      {
+        question: "Faktor eksternal yang paling besar memengaruhi munculnya Pergerakan Nasional Indonesia awal abad ke-20 adalah …",
+        options: ["Kebijakan Politik Etis", "Kemenangan Jepang atas Rusia (1905)", "Berkembangnya nasionalisme di Amerika Latin", "Munculnya kelas priyayi terpelajar", "Revolusi Industri di Inggris"],
+        correct: 2
+      },
+      {
+        question: "Tokoh yang secara konsisten menekankan pentingnya persatuan politik lintas etnis dalam melawan kolonialisme melalui organisasi Indische Partij adalah …",
+        options: ["Douwes Dekker", "H.O.S Tjokroaminoto", "Soetomo", "Ki Hadjar Dewantara", "Mohammad Husni Thamrin"],
+        correct: 1
+      },
+      {
+        question: "Perbedaan mendasar antara cara perjuangan Budi Utomo dan Sarekat Islam terletak pada …",
+        options: ["Pemanfaatan media massa", "Basis sosial pendukung gerakan", "Penggunaan strategi parlementer", "Keterlibatan kaum perempuan", "Tujuan mencapai kemerdekaan penuh"],
+        correct: 2
+      },
+      {
+        question: "Peristiwa yang langsung mendorong berdirinya PNI (1927) adalah …",
+        options: ["Penangkapan pemimpin Sarekat Islam Merah", "Pengasingan Tiga Serangkai", "Pembubaran Indische Partij", "Kekecewaan terhadap hasil Volksraad", "Kegagalan Budi Utomo memperluas basis massa"],
+        correct: 4
+      },
+      {
+        question: "Salah satu alasan pemerintah kolonial membubarkan PKI tahun 1926–1927 adalah …",
+        options: ["PKI bekerja sama dengan Jepang", "PKI dianggap mengancam stabilitas ekonomi perkebunan", "PKI melakukan pemberontakan bersenjata", "PKI menolak keras kebijakan Politik Etis", "PKI menguasai Volksraad secara mayoritas"],
+        correct: 3
+      },
+      {
+        question: "Gagasan “Indonesia Merdeka” yang ditekankan Soekarno dalam Pidato di Bandung (1930) berintikan …",
+        options: ["Pembentukan negara federasi berbasis etnis", "Perjuangan kooperatif terhadap kolonialisme", "Persatuan nasional sebagai syarat kemerdekaan", "Perbaikan ekonomi rakyat melalui Politik Etis", "Tunduk pada hukum internasional Liga Bangsa-Bangsa"],
+        correct: 3
+      },
+      {
+        question: "Organisasi yang pertama kali memunculkan konsep non-kooperatif terhadap pemerintah kolonial adalah …",
+        options: ["PNI", "Gerindo", "Partai Indonesia Raya", "Indische Partij", "Budi Utomo"],
+        correct: 4
+      },
+      {
+        question: "Kongres Pemuda II menghasilkan Sumpah Pemuda. Faktor berikut yang paling menentukan keberhasilan kongres tersebut adalah …",
+        options: ["Dukungan langsung pemerintah kolonial", "Penggunaan bahasa Melayu sebagai lingua franca", "Dominasi pemuda Sumatra dalam kepanitiaan", "Pendanaan besar dari organisasi Tionghoa", "Keterlibatan tokoh Volksraad dalam sidang"],
+        correct: 2
+      },
+      {
+        question: "Strategi 'kooperatif-kritis' yang dikembangkan Mohammad Husni Thamrin dalam Volksraad bertujuan untuk …",
+        options: ["Mempercepat federalisasi Hindia Belanda", "Memperoleh otonomi daerah seluas-luasnya", "Memaksa Belanda memberikan hak veto bagi bumiputra", "Menggunakan lembaga kolonial sebagai alat memperjuangkan kepentingan nasional", "Menggantikan posisi birokrasi Belanda secara struktural"],
+        correct: 4
+      },
+      {
+        question: "Gerakan perempuan Indonesia pada masa pergerakan nasional paling banyak dipengaruhi oleh …",
+        options: ["Perkembangan feminisme di Inggris", "Politik Etis dan perluasan kesempatan pendidikan", "Kebijakan diskriminatif Jepang", "Konflik antara PNI dan Partindo", "Propaganda komunis di Asia Tenggara"],
+        correct: 2
+      },
+      {
+        question: "Siapa tokoh yang mendirikan organisasi Budi Utomo pada tahun 1908?",
+        options: ["Soekarno", "Mohammad Hatta", "Dr. Wahidin Sudirohusodo", "Ki Hajar Dewantara", "Tan Malaka"],
+        correct: 2
+      },
+      {
+        question: "Organisasi Sarekat Islam didirikan oleh siapa?",
+        options: ["H.O.S. Tjokroaminoto", "Haji Samanhudi", "Agus Salim", "Abdul Muis", "Douwes Dekker"],
+        correct: 1
+      },
+      {
+        question: "Kapan Sumpah Pemuda diikrarkan?",
+        options: ["17 Agustus 1945", "20 Mei 1908", "28 Oktober 1928", "1 Juni 1945", "30 September 1965"],
+        correct: 2
+      },
+      {
+        question: "Siapa yang dikenal sebagai Bapak Pendidikan Indonesia?",
+        options: ["R.A. Kartini", "Ki Hajar Dewantara", "Mohammad Yamin", "Sutomo", "Soepomo"],
+        correct: 1
+      },
+      {
+        question: "Organisasi pemuda yang mempelopori Sumpah Pemuda adalah?",
+        options: ["Budi Utomo", "Jong Java", "Perhimpunan Indonesia", "Semua organisasi pemuda", "Indische Partij"],
+        correct: 3
+      },
+      {
+        question: "Siapa proklamator kemerdekaan Indonesia?",
+        options: ["Soekarno dan Hatta", "Soeharto dan Sudirman", "Tan Malaka dan Sjahrir", "Ki Hajar dan Kartini", "Ahmad Dahlan dan Wahid Hasyim"],
+        correct: 0
+      },
+      {
+        question: "Taman Siswa didirikan oleh Ki Hajar Dewantara pada tahun?",
+        options: ["1908", "1922", "1928", "1945", "1920"],
+        correct: 1
+      },
+      {
+        question: "Siapa penulis surat 'Habis Gelap Terbitlah Terang'?",
+        options: ["Cut Nyak Dien", "R.A. Kartini", "Dewi Sartika", "Maria Walanda Maramis", "Rasuna Said"],
+        correct: 1
+      },
+      {
+        question: "Organisasi Indische Partij didirikan oleh?",
+        options: ["Douwes Dekker", "Tjipto Mangunkusumo", "Suwardi Suryaningrat", "Ketiganya benar", "Tidak ada yang benar"],
+        correct: 3
+      },
+      {
+        question: "Kongres Pemuda I diadakan di kota mana?",
+        options: ["Jakarta", "Bandung", "Surabaya", "Yogyakarta", "Semarang"],
+        correct: 0
+      },
+      {
+        question: "Muhammadiyah didirikan oleh siapa?",
+        options: ["KH. Ahmad Dahlan", "KH. Hasyim Asy'ari", "KH. Wahid Hasyim", "Agus Salim", "H.O.S. Tjokroaminoto"],
+        correct: 0
+      },
+      {
+        question: "Nahdlatul Ulama (NU) didirikan pada tahun?",
+        options: ["1908", "1912", "1926", "1928", "1945"],
+        correct: 2
+      },
+      {
+        question: "Siapa yang menjahit bendera Merah Putih pertama kali?",
+        options: ["R.A. Kartini", "Fatmawati", "Dewi Sartika", "Cut Nyak Dien", "Rasuna Said"],
+        correct: 1
+      },
+      {
+        question: "Peristiwa Rengasdengklok terjadi sebelum proklamasi, tokoh yang diculik adalah?",
+        options: ["Soekarno dan Hatta", "Sjahrir dan Tan Malaka", "Ahmad Dahlan", "Soeharto", "Sudirman"],
+        correct: 0
+      },
+      {
+        question: "Siapa yang membacakan teks proklamasi?",
+        options: ["Mohammad Hatta", "Soekarno", "Ahmad Soebardjo", "Soepomo", "Mohammad Yamin"],
+        correct: 1
+      },
+      {
+        question: "Nama asli Ki Hajar Dewantara adalah?",
+        options: ["Raden Mas Soewardi Soerjaningrat", "Raden Adipati Tirto", "Raden Ajeng Kartini", "Raden Mas Said", "Raden Panji Sosrokartono"],
+        correct: 0
+      },
+      {
+        question: "Pelopor pendidikan perempuan di Jawa Barat adalah?",
+        options: ["R.A. Kartini", "Dewi Sartika", "Cut Nyak Dien", "Rasuna Said", "Maria Walanda Maramis"],
+        correct: 1
+      },
+      {
+        question: "Boedi Oetomo diperingati sebagai hari kebangkitan nasional pada tanggal?",
+        options: ["17 Agustus", "20 Mei", "28 Oktober", "1 Juni", "10 November"],
+        correct: 1
+      },
+      {
+        question: "Tokoh yang menulis artikel 'Als Ik Eens Nederlander Was' adalah?",
+        options: ["Soekarno", "Ki Hajar Dewantara", "Tan Malaka", "Agus Salim", "Sutan Sjahrir"],
+        correct: 1
+      },
+      {
+        question: "Partai Nasional Indonesia (PNI) didirikan pada tahun?",
+        options: ["1908", "1920", "1927", "1928", "1945"],
+        correct: 2
+      },
+      {
+        question: "Tokoh wanita yang berjuang melawan Belanda di Aceh adalah?",
+        options: ["R.A. Kartini", "Dewi Sartika", "Cut Nyak Dien", "Rasuna Said", "Christina Martha Tiahahu"],
+        correct: 2
+      },
+      {
+        question: "Kongres Pemuda II menghasilkan?",
+        options: ["Proklamasi Kemerdekaan", "Sumpah Pemuda", "Piagam Jakarta", "Pembukaan UUD 1945", "Pancasila"],
+        correct: 1
+      },
+      {
+        question: "Tokoh yang menyusun teks proklamasi adalah?",
+        options: ["Soekarno, Hatta, Soebardjo", "Soekarno dan Hatta", "Soepomo dan Yamin", "Sjahrir dan Tan Malaka", "Soekarno, Hatta, Yamin"],
+        correct: 0
+      },
+      {
+        question: "Jong Java adalah organisasi pemuda dari daerah?",
+        options: ["Sumatera", "Jawa", "Sulawesi", "Kalimantan", "Bali"],
+        correct: 1
+      },
+      {
+        question: "Perhimpunan Indonesia adalah organisasi pemuda yang berbasis di?",
+        options: ["Jakarta", "Surabaya", "Belanda", "Singapura", "Malaysia"],
+        correct: 2
+      },
+      {
+        question: "Siapa yang mencetuskan dasar negara Pancasila?",
+        options: ["Mohammad Hatta", "Soekarno", "Soepomo", "Mohammad Yamin", "Ki Hajar Dewantara"],
+        correct: 1
+      },
+      {
+        question: "Peristiwa 10 November 1945 terjadi di kota?",
+        options: ["Jakarta", "Bandung", "Surabaya", "Semarang", "Yogyakarta"],
+        correct: 2
+      },
+      {
+        question: "BPUPKI dibentuk pada tanggal?",
+        options: ["29 April 1945", "1 Juni 1945", "17 Agustus 1945", "18 Agustus 1945", "1 Maret 1945"],
+        correct: 0
+      },
+      {
+        question: "Tokoh yang dikenal sebagai Bung Karno adalah?",
+        options: ["Soekarno", "Soeharto", "Mohammad Hatta", "Tan Malaka", "Sjahrir"],
+        correct: 0
+      },
+      {
+        question: "Kata 'merdeka' dalam proklamasi berarti?",
+        options: ["Kaya", "Bebas", "Damai", "Adil", "Makmur"],
+        correct: 1
+      },
+      {
+        question: "Organisasi wanita pertama di Indonesia adalah?",
+        options: ["Aisyiyah", "Putri Mardika", "Wanita Katolik", "Istri Sedar", "PKK"],
+        correct: 1
+      },
+      {
+        question: "Tokoh yang dikenal dengan sebutan Bung Hatta adalah?",
+        options: ["Soekarno", "Mohammad Hatta", "Sjahrir", "Tan Malaka", "Soepomo"],
+        correct: 1
+      },
+      {
+        question: "Sumpah Pemuda terdiri dari berapa ikrar?",
+        options: ["Satu", "Dua", "Tiga", "Empat", "Lima"],
+        correct: 2
+      },
+      {
+        question: "Lagu Indonesia Raya diciptakan oleh?",
+        options: ["C. Simanjuntak", "W.R. Supratman", "Ismail Marzuki", "Gesang", "Ibu Sud"],
+        correct: 1
+      },
+      {
+        question: "Tokoh yang dijuluki Singa Podium adalah?",
+        options: ["Soekarno", "Mohammad Hatta", "Tan Malaka", "Bung Tomo", "Sjahrir"],
+        correct: 0
+      },
+      {
+    question: "Indische Partij bersifat progresif karena memperjuangkan…",
+    options: [
+      "Pendidikan bagi anak pribumi saja",
+      "Kesetaraan masyarakat Hindia Belanda tanpa memandang ras",
+      "Perdagangan bebas",
+      "Perjuangan bersenjata",
+      "Dominasi politik kaum priyayi"
+    ],
+    correct: 2
+  },
+  {
+    question: "Organisasi pemuda yang berperan penting dalam Sumpah Pemuda adalah…",
+    options: [
+      "Muhammadiyah",
+      "Jong Java",
+      "Sarekat Islam",
+      "PNI",
+      "Indische Partij"
+    ],
+    correct: 2
+  },
+  {
+    question: "Pendiri PNI (Partai Nasional Indonesia) adalah…",
+    options: [
+      "Dr. Sutomo",
+      "Soekarno",
+      "Ki Hajar Dewantara",
+      "Agus Salim",
+      "Sutan Sjahrir"
+    ],
+    correct: 2
+  },
+  {
+    question: "Salah satu ciri pergerakan nasional tahap radikal adalah…",
+    options: [
+      "Menghindari kritik terhadap pemerintah Belanda",
+      "Bersifat kooperatif",
+      "Menggunakan pendidikan sebagai sarana utama",
+      "Bersifat non-kooperatif dan menuntut kemerdekaan",
+      "Fokus pada perdagangan dan ekonomi"
+    ],
+    correct: 4
+  }
+    ];
+
+    let gameState = {
+      playerCount: 3,
+      players: [],
+      currentPlayerIndex: 0,
+      diceValue: 0,
+      gameStarted: false,
+      isRolling: false,
+      isMoving: false,
+      finishedPlayers: []
+    };
+
+    function shuffleArray(array) {
+      const newArray = [...array];
+      for (let i = newArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+      }
+      return newArray;
+    }
+
+    function initGame() {
+      const selectedAvatars = shuffleArray(avatars).slice(0, gameState.playerCount);
+      gameState.players = [];
+      
+      for (let i = 0; i < gameState.playerCount; i++) {
+        gameState.players.push({
+          id: i,
+          name: `Pemain ${i + 1}`,
+          avatar: selectedAvatars[i],
+          position: 0,
+          score: 0,
+          finished: false,
+          finishRank: 0
+        });
+      }
+
+      gameState.currentPlayerIndex = 0;
+      gameState.gameStarted = true;
+      gameState.finishedPlayers = [];
+
+      renderPlayersInfo();
+      renderBoard();
+      updateDiceButton();
+    }
+
+    function renderPlayersInfo() {
+      const container = document.getElementById('playersInfo');
+      container.innerHTML = '';
+
+      gameState.players.forEach((player, index) => {
+        const card = document.createElement('div');
+        card.className = 'player-card';
+        if (index === gameState.currentPlayerIndex && !player.finished) {
+          card.classList.add('active');
+        }
+        if (player.finished) {
+          card.classList.add('finished');
+        }
+
+        card.innerHTML = `
+          <div class="player-avatar"><img src="${player.avatar}" alt="${player.name}" onerror="this.style.display='none'"></div>
+          <div class="player-details">
+            <div class="player-name">${player.name}</div>
+            <div class="player-stats">Kotak: ${player.position} | Poin: ${player.score}</div>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    function renderBoard() {
+      const grid = document.getElementById('boardGrid');
+      grid.innerHTML = '';
+
+      for (let row = 9; row >= 0; row--) {
+        for (let col = 0; col < 10; col++) {
+          let cellNumber;
+          if (row % 2 === 1) {
+            cellNumber = row * 10 + (10 - col);
+          } else {
+            cellNumber = row * 10 + (col + 1);
+          }
+
+          const cell = document.createElement('div');
+          cell.className = 'board-cell';
+          cell.dataset.position = cellNumber;
+
+          let cellContent = `<span class="cell-number">${cellNumber}</span>`;
+
+          if (cellNumber === 100) {
+            cell.classList.add('finish');
+            cellContent = '🏁';
+          } else if (snakesAndLadders[cellNumber]) {
+            const target = snakesAndLadders[cellNumber];
+            if (target > cellNumber) {
+              cell.classList.add('ladder');
+              cellContent += '🪜';
+            } else {
+              cell.classList.add('snake');
+              cellContent += '🐍';
+            }
+          }
+
+          const playersHere = gameState.players.filter(p => p.position === cellNumber && !p.finished);
+          if (playersHere.length > 0) {
+            cellContent += '<div class="cell-players">';
+            playersHere.forEach(p => {
+              cellContent += `<div class="cell-player-avatar"><img src="${p.avatar}" alt="${p.name}" onerror="this.style.display='none'"></div>`;
+            });
+            cellContent += '</div>';
+          }
+
+          cell.innerHTML = cellContent;
+          grid.appendChild(cell);
+        }
+      }
+    }
+
+    function rollDice() {
+      if (gameState.isRolling || gameState.isMoving) return;
+
+      const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+      if (currentPlayer.finished) {
+        nextTurn();
+        return;
+      }
+
+      gameState.isRolling = true;
+      const rollBtn = document.getElementById('rollDiceBtn');
+      rollBtn.disabled = true;
+
+      const diceDisplay = document.getElementById('diceDisplay');
+      let rollCount = 0;
+      const rollInterval = setInterval(() => {
+        const randomDice = Math.floor(Math.random() * 6);
+        diceDisplay.textContent = diceEmojis[randomDice];
+        rollCount++;
+
+        if (rollCount >= 10) {
+          clearInterval(rollInterval);
+          const finalValue = Math.floor(Math.random() * 6) + 1;
+          gameState.diceValue = finalValue;
+          diceDisplay.textContent = diceEmojis[finalValue - 1];
+          
+          setTimeout(() => {
+            movePlayer();
+          }, 500);
+        }
+      }, 100);
+    }
+
+    function movePlayer() {
+      const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+      const newPosition = Math.min(currentPlayer.position + gameState.diceValue, 100);
+      
+      gameState.isMoving = true;
+      
+      let step = 0;
+      const moveInterval = setInterval(() => {
+        if (step < gameState.diceValue && currentPlayer.position < 100) {
+          currentPlayer.position++;
+          renderBoard();
+          renderPlayersInfo();
+          step++;
+        } else {
+          clearInterval(moveInterval);
+          
+          if (snakesAndLadders[currentPlayer.position]) {
+            setTimeout(() => {
+              currentPlayer.position = snakesAndLadders[currentPlayer.position];
+              renderBoard();
+              renderPlayersInfo();
+              
+              setTimeout(() => {
+                if (currentPlayer.position === 100) {
+                  handlePlayerFinish();
+                } else {
+                  showQuiz();
+                }
+              }, 800);
+            }, 500);
+          } else {
+            if (currentPlayer.position === 100) {
+              handlePlayerFinish();
+            } else {
+              showQuiz();
+            }
+          }
+        }
+      }, 300);
+    }
+
+    function showQuiz() {
+      const quiz = quizData[Math.floor(Math.random() * quizData.length)];
+      const modal = document.getElementById('quizModal');
+      const question = document.getElementById('quizQuestion');
+      const optionsContainer = document.getElementById('quizOptions');
+      const resultDiv = document.getElementById('quizResult');
+      const penaltyDiv = document.getElementById('penaltyChoice');
+      const continueBtn = document.getElementById('continueBtn');
+
+      question.textContent = quiz.question;
+      optionsContainer.innerHTML = '';
+      resultDiv.innerHTML = '';
+      resultDiv.style.display = 'none';
+      penaltyDiv.innerHTML = '';
+      penaltyDiv.style.display = 'none';
+      continueBtn.style.display = 'none';
+
+      quiz.options.forEach((option, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'quiz-option';
+        btn.textContent = option;
+        btn.onclick = () => handleQuizAnswer(index, quiz.correct, btn);
+        optionsContainer.appendChild(btn);
+      });
+
+      modal.style.display = 'flex';
+    }
+
+    function handleQuizAnswer(selectedIndex, correctIndex, selectedBtn) {
+      const optionBtns = document.querySelectorAll('.quiz-option');
+      optionBtns.forEach(btn => btn.disabled = true);
+
+      const resultDiv = document.getElementById('quizResult');
+      const penaltyDiv = document.getElementById('penaltyChoice');
+      const continueBtn = document.getElementById('continueBtn');
+      const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+
+      const correctPoints = parseInt(window.elementSdk ? (window.elementSdk.config.quiz_correct_points || defaultConfig.quiz_correct_points) : defaultConfig.quiz_correct_points);
+      const wrongPenalty = parseInt(window.elementSdk ? (window.elementSdk.config.quiz_wrong_penalty || defaultConfig.quiz_wrong_penalty) : defaultConfig.quiz_wrong_penalty);
+
+      if (selectedIndex === correctIndex) {
+        selectedBtn.classList.add('correct');
+        currentPlayer.score += correctPoints;
+        resultDiv.className = 'quiz-result correct';
+        resultDiv.textContent = `✓ Benar! +${correctPoints} poin`;
+        resultDiv.style.display = 'block';
+        continueBtn.style.display = 'block';
+      } else {
+        selectedBtn.classList.add('wrong');
+        optionBtns[correctIndex].classList.add('correct');
+        resultDiv.className = 'quiz-result wrong';
+        resultDiv.textContent = '✗ Salah! Pilih hukuman:';
+        resultDiv.style.display = 'block';
+
+        const moveBackBtn = document.createElement('button');
+        moveBackBtn.className = 'penalty-btn move-back';
+        moveBackBtn.textContent = 'Mundur 1 Kotak';
+        moveBackBtn.onclick = () => {
+          if (currentPlayer.position > 0) {
+            currentPlayer.position--;
+          }
+          renderBoard();
+          renderPlayersInfo();
+          penaltyDiv.style.display = 'none';
+          continueBtn.style.display = 'block';
+        };
+
+        const losePointsBtn = document.createElement('button');
+        losePointsBtn.className = 'penalty-btn lose-points';
+        losePointsBtn.textContent = `Kurang ${wrongPenalty} Poin`;
+        losePointsBtn.onclick = () => {
+          currentPlayer.score = Math.max(0, currentPlayer.score - wrongPenalty);
+          renderPlayersInfo();
+          penaltyDiv.style.display = 'none';
+          continueBtn.style.display = 'block';
+        };
+
+        penaltyDiv.appendChild(moveBackBtn);
+        penaltyDiv.appendChild(losePointsBtn);
+        penaltyDiv.style.display = 'flex';
+      }
+
+      renderPlayersInfo();
+    }
+
+    function handlePlayerFinish() {
+      const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+      currentPlayer.finished = true;
+      currentPlayer.finishRank = gameState.finishedPlayers.length + 1;
+      gameState.finishedPlayers.push(currentPlayer);
+
+      renderPlayersInfo();
+      showFinishModal(currentPlayer);
+    }
+
+    function showFinishModal(player) {
+      const modal = document.getElementById('finishModal');
+      const avatar = document.getElementById('finishPlayerAvatar');
+      const name = document.getElementById('finishPlayerName');
+      const score = document.getElementById('finishPlayerScore');
+      const ranking = document.getElementById('finishRanking');
+
+      avatar.innerHTML = `<img src="${player.avatar}" alt="${player.name}" onerror="this.style.display='none'">`;
+      name.textContent = player.name;
+      score.textContent = `Peringkat #${player.finishRank} | Skor: ${player.score} poin`;
+
+      ranking.innerHTML = '<div class="ranking-title">Klasemen Sementara</div>';
+      
+      const sortedFinished = [...gameState.finishedPlayers].sort((a, b) => {
+        if (a.finishRank !== b.finishRank) return a.finishRank - b.finishRank;
+        return b.score - a.score;
+      });
+
+      sortedFinished.forEach((p, idx) => {
+        const item = document.createElement('div');
+        item.className = 'ranking-item';
+        item.innerHTML = `
+          <div class="ranking-position">#${idx + 1}</div>
+          <div class="ranking-avatar"><img src="${p.avatar}" alt="${p.name}" onerror="this.style.display='none'"></div>
+          <div class="ranking-info">
+            <div class="ranking-name">${p.name}</div>
+            <div class="ranking-score">Skor: ${p.score} poin</div>
+          </div>
+        `;
+        ranking.appendChild(item);
+      });
+
+      modal.style.display = 'flex';
+    }
+
+    function closeFinishModal() {
+      const modal = document.getElementById('finishModal');
+      modal.style.display = 'none';
+
+      const allFinished = gameState.players.every(p => p.finished);
+      if (allFinished) {
+        gameState.isMoving = false;
+        gameState.isRolling = false;
+        updateDiceButton();
+      } else {
+        nextTurn();
+      }
+    }
+
+    function closeQuizModal() {
+      const modal = document.getElementById('quizModal');
+      modal.style.display = 'none';
+      nextTurn();
+    }
+
+    function nextTurn() {
+      do {
+        gameState.currentPlayerIndex = (gameState.currentPlayerIndex + 1) % gameState.players.length;
+      } while (gameState.players[gameState.currentPlayerIndex].finished && 
+               !gameState.players.every(p => p.finished));
+
+      gameState.isRolling = false;
+      gameState.isMoving = false;
+
+      renderPlayersInfo();
+      updateDiceButton();
+    }
+
+    function updateDiceButton() {
+      const rollBtn = document.getElementById('rollDiceBtn');
+      const allFinished = gameState.players.every(p => p.finished);
+      
+      if (allFinished) {
+        rollBtn.disabled = true;
+        rollBtn.textContent = 'Permainan Selesai';
+      } else {
+        rollBtn.disabled = false;
+        const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+        rollBtn.textContent = `${currentPlayer.name} - Lempar Dadu`;
+      }
+    }
+
+    document.querySelectorAll('.player-count-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.player-count-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        gameState.playerCount = parseInt(this.dataset.count);
+      });
+    });
+
+    document.getElementById('startGameBtn').addEventListener('click', function() {
+      document.getElementById('playerSetup').style.display = 'none';
+      document.getElementById('gameBoardContainer').style.display = 'block';
+      initGame();
+    });
+
+    document.getElementById('rollDiceBtn').addEventListener('click', rollDice);
+
+    document.getElementById('continueBtn').addEventListener('click', closeQuizModal);
+
+    document.getElementById('closeFinishBtn').addEventListener('click', closeFinishModal);
+
+    async function onConfigChange(config) {
+      const titleElement = document.getElementById('gameTitle');
+      const customTitle = config.game_title || defaultConfig.game_title;
+      titleElement.textContent = customTitle;
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig: defaultConfig,
+        onConfigChange: onConfigChange,
+        mapToCapabilities: (config) => ({
+          recolorables: [],
+          borderables: [],
+          fontEditable: undefined,
+          fontSizeable: undefined
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ["game_title", config.game_title || defaultConfig.game_title],
+          ["quiz_correct_points", config.quiz_correct_points || defaultConfig.quiz_correct_points],
+          ["quiz_wrong_penalty", config.quiz_wrong_penalty || defaultConfig.quiz_wrong_penalty]
+        ])
+      });
+    }
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a56a918e0e7ea7a',t:'MTc2NDI5OTMwNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
