@@ -10,10 +10,10 @@ Permainan ular tangga HTML dengan kuis sejarah. Project ini dibuat untuk keperlu
 - **Simpan Halaman** : Download HTML dan assets untuk memainkan secara offline
 
 ### Penggunaan
-- Buka https://kemalsyabaniadama.github.com/Ular-Tangga-Pahlawan
-- Pilih jumlah pemain. Ajak teman sekitar untuk ikut bermain
-- Klik untuk kocok dadu sesuai giliran pemain
-- Jawab kuis dengan benar, lalu lanjut untuk giliran pemain berikutnya
-- Pemain yang mencapai titik 100 akan dimunculkan popup skor dan kemenangan
+1. Buka https://kemalsyabaniadama.github.com/Ular-Tangga-Pahlawan
+2. Pilih jumlah pemain. Ajak teman sekitar untuk ikut bermain
+3. Klik untuk kocok dadu sesuai giliran pemain
+4. Jawab kuis dengan benar, lalu lanjut untuk giliran pemain berikutnya
+5. Pemain yang mencapai titik 100 akan dimunculkan popup skor dan kemenangan
 
 *Konten dibuat oleh AI, mungkin terdapat kesalahan*
